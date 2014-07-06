@@ -4,9 +4,9 @@ layout: default
 
 Diese Webseite wird betrieben von
 
-Jonas Oberschweiber \\
-Calvinstr. 3 \\
-24114 Kiel \\
+Jonas Oberschweiber
+Calvinstr. 3
+24114 Kiel
 Email: jonas@oberschweiber.com
 
 Inhaltlich Verantwortlicher im Sinne § 55 Abs. 2 RStV: Jonas Oberschweiber
