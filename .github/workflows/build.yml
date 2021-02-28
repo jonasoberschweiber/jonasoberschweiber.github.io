@@ -1,0 +1,24 @@
+name: Build and deploy
+
+on: push
+
+jobs:
+  build-page:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 15.10.0
+    - name: Install Ruby dependencies
+      run: bundle install
+    - name: Install Node.js dependencies
+      run: npm install
+    - name: Build site
+      run: JEKYLL_ENV=production NODE_ENV=production bundle exec jekyll build
