@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Making a WiFi-connected Temperature Sensor
+published: false
 ---
 
 # Making a WiFi-connected Temperature Sensor
