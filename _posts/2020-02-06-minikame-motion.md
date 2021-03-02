@@ -37,9 +37,14 @@ title: miniKame Motion
     el.dispatchEvent(new Event('input'));
   };
   function scaleCanvas(canvas) {
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
+    const pixelRatio = window.devicePixelRatio;
+    const width = canvas.clientWidth * pixelRatio || 0;
+    const height = canvas.clientHeight * pixelRatio || 0;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      canvas.width = canvas.clientWidth * pixelRatio;
+      canvas.height = canvas.clientHeight * pixelRatio;
+    }
   }
   (() => {
     const application = Stimulus.Application.start();
