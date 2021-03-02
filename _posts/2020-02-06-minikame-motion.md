@@ -496,7 +496,7 @@ on the same "clock" -- in my Python code, I simply use the milliseconds elapsed
 since the start of the program. I update the servos once every millisecond in
 my Python code.
 
-```python
+```
 while True:
   time.sleep(1.0 / 1000.0)
   t = datetime.now().timestamp() * 1000.0
@@ -823,10 +823,9 @@ front right and back left <fr-bl></fr-bl> brace sine waves and a phase shift of
 
 <div data-controller="four-braces" class="flex flex-col space-y-4 py-6">
   <div class="flex flex-row">
-    <canvas class="h-36 w-1/2" data-four-braces-target="braceCanvas"></canvas>
-    <canvas class="h-36 w-1/2" data-four-braces-target="waveCanvas"></canvas>
+    <canvas class="h-36" data-four-braces-target="braceCanvas"></canvas>
   </div>
-  <div class="flex flex-row space-x-6">
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
     <div class="flex flex-col flex-shrink min-w-0 space-y-1">
       <label class="font-semibold" for="phaseBRFL">Phase FL/BR <fl-br></fl-br></label>
       <input
@@ -941,7 +940,7 @@ when it's moving from back to front.
 To solve this, the miniKame code uses a little trick. It disables the foot
 oscillator for half of the period.
 
-```python
+```
 while True:
   time.sleep(1.0 / 1000.0)
   t = datetime.now().timestamp() * 1000.0
