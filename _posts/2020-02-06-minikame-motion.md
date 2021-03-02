@@ -185,6 +185,7 @@ title: miniKame Motion
         };
         requestAnimationFrame(animate);
         this.updateDisplays();
+        window.addEventListener('resize', () => scaleCanvas(this.braceCanvasTarget));
       }
       updateDisplays() {
         if (this.hasPeriodDisplayTarget) {
@@ -201,7 +202,6 @@ title: miniKame Motion
         }
       }
       drawBrace(timeMs) {
-        scaleCanvas(this.braceCanvasTarget);
         const canvas = this.braceCanvasTarget;
         const ctx = canvas.getContext('2d');
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -262,6 +262,7 @@ title: miniKame Motion
         };
         requestAnimationFrame(animate);
         this.updateDisplays();
+        window.addEventListener('resize', () => scaleCanvas(this.braceCanvasTarget));
       }
       updateDisplays() {
         if (this.hasPhaseBLFRDisplayTarget) {
@@ -285,7 +286,6 @@ title: miniKame Motion
         return `${phase.toFixed(3).toString()} rad / ${degrees} deg` + closestPiFraction;
       }
       drawBraces(timeMs) {
-        scaleCanvas(this.braceCanvasTarget);
         const canvas = this.braceCanvasTarget;
         const ctx = canvas.getContext('2d');
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -375,7 +375,11 @@ title: miniKame Motion
         scaleCanvas(this.footCanvasTarget);
         this.timeTarget.value = 0;
         this.activeSideTarget.checked = this.activeSide === 0;
-        window.addEventListener('resize', () => this.draw(parseInt(this.timeTarget.value)));
+        window.addEventListener('resize', () => {
+          scaleCanvas(this.braceCanvasTarget);
+          scaleCanvas(this.footCanvasTarget);
+          this.draw(parseInt(this.timeTarget.value));
+        });
         this.draw(0)
       }
       changeTime() {
@@ -387,8 +391,6 @@ title: miniKame Motion
         this.draw(parseInt(this.timeTarget.value));
       }
       draw(timeMs) {
-        scaleCanvas(this.braceCanvasTarget);
-        scaleCanvas(this.footCanvasTarget);
         this.drawBrace(timeMs);
         this.braceView.update(timeMs);
         this.footView.update(timeMs);

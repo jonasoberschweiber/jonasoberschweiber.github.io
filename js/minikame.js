@@ -186,8 +186,8 @@ class OscillatorView2D {
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * window.devicePixelRatio;
     canvas.height = rect.height * window.devicePixelRatio;
-      //canvas.style.width = `${rect.width}px`;
-      //canvas.style.height = `${rect.height}px`;
+
+    window.addEventListener('resize', () => this.resizeCanvas());
 
     //this.context = canvas.getContext('2d');
     //this.context.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -208,7 +208,6 @@ class OscillatorView2D {
   }
 
   update(timeMs) {
-    this.resizeCanvas();
     const canvas = this.canvas;
     const width = canvas.width / window.devicePixelRatio;
     const height = canvas.height / window.devicePixelRatio;
