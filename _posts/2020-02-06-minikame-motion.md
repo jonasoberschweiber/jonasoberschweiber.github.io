@@ -40,8 +40,6 @@ title: miniKame Motion
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * window.devicePixelRatio;
     canvas.height = rect.height * window.devicePixelRatio;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
   }
   (() => {
     const application = Stimulus.Application.start();
@@ -106,6 +104,7 @@ title: miniKame Motion
         if (this.hasPeriodTarget) {
           this.periodTarget.value = this.oscillator.period;
         }
+        window.addEventListener('resize', () => this.draw());
       }
       disconnect() {
         this.view = null;
@@ -197,6 +196,7 @@ title: miniKame Motion
         }
       }
       drawBrace(timeMs) {
+        scaleCanvas(this.braceCanvasTarget);
         const canvas = this.braceCanvasTarget;
         const ctx = canvas.getContext('2d');
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -280,6 +280,7 @@ title: miniKame Motion
         return `${phase.toFixed(3).toString()} rad / ${degrees} deg` + closestPiFraction;
       }
       drawBraces(timeMs) {
+        scaleCanvas(this.braceCanvasTarget);
         const canvas = this.braceCanvasTarget;
         const ctx = canvas.getContext('2d');
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -369,6 +370,7 @@ title: miniKame Motion
         scaleCanvas(this.footCanvasTarget);
         this.timeTarget.value = 0;
         this.activeSideTarget.checked = this.activeSide === 0;
+        window.addEventListener('resize', () => this.draw(parseInt(this.timeTarget.value)));
         this.draw(0)
       }
       changeTime() {
@@ -380,6 +382,8 @@ title: miniKame Motion
         this.draw(parseInt(this.timeTarget.value));
       }
       draw(timeMs) {
+        scaleCanvas(this.braceCanvasTarget);
+        scaleCanvas(this.footCanvasTarget);
         this.drawBrace(timeMs);
         this.braceView.update(timeMs);
         this.footView.update(timeMs);
@@ -450,7 +454,7 @@ be fast enough on my WiFi network, with only occasional lags and hickups.
 To get my miniKame walking, I ported some of the original C code to Python, which
 worked well after some fiddling. I got the robot moving.
 
-<video width="680px" controls>
+<video controls>
   <source src="/images/minikame.mp4" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
@@ -471,7 +475,7 @@ can use to move around. Each leg is powered by two servos, one controlling the
 XY-direction (I call that one the "brace"), and one controlling the Z-direction
 (I call that one the "foot")[^2].
 
-<img src="/images/minikame-labeled.jpg" width="680px" alt="miniKame with labels" />
+<img src="/images/minikame-labeled.jpg" alt="miniKame with labels" />
 
 Each servo has a limited useful range of motion due to the way miniKame is
 constructed -- at some point the XY-brace simply cannot move further because it's
@@ -517,8 +521,9 @@ We can get a basic sine wave using the formula y(t) = sin(t).
      data-sine-x-labels-value="0 π 2π 3π 4π 5π 6π 7π 8π 9π 10π"
      data-sine-period-value="628"
      data-sine-ticks-value="3141"
+     class="py-6"
   >
-  <canvas id="plain" data-sine-target="canvas" style="width: 100%; height: 150px;"></canvas>
+  <canvas class="w-full h-36" id="plain" data-sine-target="canvas"></canvas>
 </div>
 
 This plot shows the value of sin(t) from 0 to 10 * π. An unmodified sine wave
@@ -539,10 +544,12 @@ y(t) = sin(period * t)
      data-sine-x-labels-value="0 500 1000 1500 2000"
      data-sine-period-value="1000"
      data-sine-ticks-value="2000"
+     class="flex flex-col space-y-4 py-6"
   >
-  <canvas data-sine-target="canvas" style="width: 100%; height: 150px;"></canvas>
-  <div style="display: flex; flex-direction: row;">
-    <div>
+  <canvas class="w-full h-36" data-sine-target="canvas"></canvas>
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="period">Period</label>
       <input
         data-sine-target="period"
         data-action="sine#changePeriod"
@@ -552,7 +559,6 @@ y(t) = sin(period * t)
         step="1"
         name="period"
       />
-      <label for="period">Period</label>
       <input type="text" data-sine-target="periodDisplay" readonly="true" />
     </div>
   </div>
@@ -570,10 +576,12 @@ y(t) = amplitude * sin(period * t)
      data-sine-x-labels-value="0 500 1000 1500 2000"
      data-sine-period-value="1000"
      data-sine-ticks-value="2000"
+     class="flex flex-col space-y-4 py-6"
   >
-  <canvas data-sine-target="canvas" style="width: 100%; height: 150px;"></canvas>
-  <div style="display: flex; flex-direction: row;">
-    <div>
+  <canvas class="w-full h-36" data-sine-target="canvas"></canvas>
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="period">Period</label>
       <input
         data-sine-target="period"
         data-action="sine#changePeriod"
@@ -583,10 +591,10 @@ y(t) = amplitude * sin(period * t)
         step="1"
         name="period"
       />
-      <label for="period">Period</label>
       <input type="text" data-sine-target="periodDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="amplitude">Amplitude</label>
       <input
         data-sine-target="amplitude"
         data-action="sine#changeAmplitude"
@@ -596,7 +604,6 @@ y(t) = amplitude * sin(period * t)
         step="0.1"
         name="amplitude"
       />
-      <label for="amplitude">Amplitude</label>
       <input type="text" data-sine-target="amplitudeDisplay" readonly="true" />
     </div>
   </div>
@@ -614,10 +621,12 @@ y(t) = amplitude * sin(period * (t + phase))
      data-sine-x-labels-value="0 500 1000 1500 2000"
      data-sine-period-value="1000"
      data-sine-ticks-value="2000"
+     class="flex flex-col space-y-4 py-6"
   >
-  <canvas data-sine-target="canvas" style="width: 100%; height: 150px;"></canvas>
-  <div style="display: flex; flex-direction: row;">
-    <div>
+  <canvas class="w-full h-36" data-sine-target="canvas"></canvas>
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="period">Period</label>
       <input
         data-sine-target="period"
         data-action="sine#changePeriod"
@@ -627,10 +636,10 @@ y(t) = amplitude * sin(period * (t + phase))
         step="1"
         name="period"
       />
-      <label for="period">Period</label>
       <input type="text" data-sine-target="periodDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="amplitude">Amplitude</label>
       <input
         data-sine-target="amplitude"
         data-action="sine#changeAmplitude"
@@ -640,10 +649,10 @@ y(t) = amplitude * sin(period * (t + phase))
         step="0.1"
         name="amplitude"
       />
-      <label for="amplitude">Amplitude</label>
       <input type="text" data-sine-target="amplitudeDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="phase">Phase</label>
       <input
         data-sine-target="phase"
         data-action="sine#changePhase"
@@ -653,7 +662,6 @@ y(t) = amplitude * sin(period * (t + phase))
         step="0.01"
         name="phase"
       />
-      <label for="phase">Phase</label>
       <input type="text" data-sine-target="phaseDisplay" readonly="true" />
     </div>
   </div>
@@ -669,10 +677,12 @@ y(t) = amplitude * sin(period * (t + phase)) + offset
      data-sine-x-labels-value="0 500 1000 1500 2000"
      data-sine-period-value="1000"
      data-sine-ticks-value="2000"
+     class="flex flex-col space-y-4 py-6"
   >
-  <canvas data-sine-target="canvas" style="width: 100%; height: 150px;"></canvas>
-  <div style="display: flex; flex-direction: row;">
-    <div>
+  <canvas class="w-full h-36" data-sine-target="canvas"></canvas>
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="period">Period</label>
       <input
         data-sine-target="period"
         data-action="sine#changePeriod"
@@ -682,10 +692,10 @@ y(t) = amplitude * sin(period * (t + phase)) + offset
         step="1"
         name="period"
       />
-      <label for="period">Period</label>
       <input type="text" data-sine-target="periodDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="amplitude">Amplitude</label>
       <input
         data-sine-target="amplitude"
         data-action="sine#changeAmplitude"
@@ -695,10 +705,10 @@ y(t) = amplitude * sin(period * (t + phase)) + offset
         step="0.1"
         name="amplitude"
       />
-      <label for="amplitude">Amplitude</label>
       <input type="text" data-sine-target="amplitudeDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="phase">Phase</label>
       <input
         data-sine-target="phase"
         data-action="sine#changePhase"
@@ -708,10 +718,10 @@ y(t) = amplitude * sin(period * (t + phase)) + offset
         step="0.01"
         name="phase"
       />
-      <label for="phase">Phase</label>
       <input type="text" data-sine-target="phaseDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="offset">Offset</label>
       <input
         data-sine-target="offset"
         data-action="sine#changeOffset"
@@ -721,7 +731,6 @@ y(t) = amplitude * sin(period * (t + phase)) + offset
         step="0.01"
         name="offset"
       />
-      <label for="offset">Offset</label>
       <input type="text" data-sine-target="offsetDisplay" readonly="true" />
     </div>
   </div>
@@ -739,13 +748,14 @@ the offset to adjust for its initial zero position (which can always vary a bit
 because of different mounting positions). Then we tweak the period until the
 speed of motion is just right.
 
-<div data-controller="single-brace">
-  <div style="display: flex; flex-direction: row;">
-    <canvas data-single-brace-target="braceCanvas" style="width: 100%; height: 150px;"></canvas>
-    <canvas data-single-brace-target="waveCanvas" style="width: 100%; height: 150px;"></canvas>
+<div data-controller="single-brace" class="flex flex-col space-y-4 py-6">
+  <div class="flex flex-row">
+    <canvas class="w-1/2 h-36" data-single-brace-target="braceCanvas"></canvas>
+    <canvas class="w-1/2 h-36" data-single-brace-target="waveCanvas"></canvas>
   </div>
-  <div style="display: flex; flex-direction: row;">
-    <div>
+  <div class="flex flex-col md:flex-row md:space-x-6 space-y-4">
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="period">Period</label>
       <input
         data-single-brace-target="period"
         data-action="single-brace#changePeriod"
@@ -755,10 +765,10 @@ speed of motion is just right.
         step="1"
         name="period"
       />
-      <label for="period">Period</label>
       <input type="text" data-single-brace-target="periodDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="amplitude">Amplitude</label>
       <input
         data-single-brace-target="amplitude"
         data-action="single-brace#changeAmplitude"
@@ -768,10 +778,10 @@ speed of motion is just right.
         step="0.1"
         name="amplitude"
       />
-      <label for="amplitude">Amplitude</label>
       <input type="text" data-single-brace-target="amplitudeDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="phase">Phase</label>
       <input
         data-single-brace-target="phase"
         data-action="single-brace#changePhase"
@@ -781,10 +791,10 @@ speed of motion is just right.
         step="0.01"
         name="phase"
       />
-      <label for="phase">Phase</label>
       <input type="text" data-single-brace-target="phaseDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="offset">Offset</label>
       <input
         data-single-brace-target="offset"
         data-action="single-brace#changeOffset"
@@ -794,7 +804,6 @@ speed of motion is just right.
         step="0.01"
         name="offset"
       />
-      <label for="offset">Offset</label>
       <input type="text" data-single-brace-target="offsetDisplay" readonly="true" />
     </div>
   </div>
@@ -807,13 +816,14 @@ braces. To achieve this, we use a phase shift of 1.5π, or 270 degrees, on the
 front right and back left <fr-bl></fr-bl> brace sine waves and a phase shift of
 0.5π, or 90 degrees, on the front left and back right <fl-br></fl-br> braces.
 
-<div data-controller="four-braces">
-  <div style="display: flex; flex-direction: row;">
-    <canvas data-four-braces-target="braceCanvas" style="width: 100%;"></canvas>
-    <canvas data-four-braces-target="waveCanvas" style="width: 100%;"></canvas>
+<div data-controller="four-braces" class="flex flex-col space-y-4 py-6">
+  <div class="flex flex-row">
+    <canvas class="h-36 w-1/2" data-four-braces-target="braceCanvas"></canvas>
+    <canvas class="h-36 w-1/2" data-four-braces-target="waveCanvas"></canvas>
   </div>
-  <div style="display: flex; flex-direction: row;">
-    <div>
+  <div class="flex flex-row space-x-6">
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="phaseBRFL">Phase FL/BR <fl-br></fl-br></label>
       <input
         data-four-braces-target="phaseBRFL"
         data-action="four-braces#changePhaseBRFL"
@@ -823,10 +833,10 @@ front right and back left <fr-bl></fr-bl> brace sine waves and a phase shift of
         step="0.01"
         name="phaseBRFL"
       />
-      <label for="phaseBRFL">Phase FL/BR <fl-br></fl-br></label>
       <input type="text" data-four-braces-target="phaseBRFLDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="phaseBLFR">Phase FR/BL <fr-bl></fr-bl></label>
       <input
         data-four-braces-target="phaseBLFR"
         data-action="four-braces#changePhaseBLFR"
@@ -836,7 +846,6 @@ front right and back left <fr-bl></fr-bl> brace sine waves and a phase shift of
         step="0.01"
         name="phaseBLFR"
       />
-      <label for="phaseBLFR">Phase FR/BL <fr-bl></fr-bl></label>
       <input type="text" data-four-braces-target="phaseBLFRDisplay" readonly="true" />
     </div>
   </div>
@@ -875,19 +884,16 @@ complete a full cycle (up, down, up) in the time it takes the brace oscillators
 to complete a half cycle (front, back). Try it in the simulation below. You can
 use the slider to move through time.
 
-<div data-controller="foot-and-brace">
-  <div style="display: flex; flex-direction: row;">
-    <div style="display: flex; flex-direction: column;">
-      <canvas data-foot-and-brace-target="braceCanvas" style="width: 100%;"></canvas>
-      <canvas data-foot-and-brace-target="footCanvas" style="width: 100%;"></canvas>
-    </div>
-    <div style="display: flex; flex-direction: column;">
-      <canvas data-foot-and-brace-target="braceWaveCanvas" style="width: 100%;"></canvas>
-      <canvas data-foot-and-brace-target="footWaveCanvas" style="width: 100%;"></canvas>
-    </div>
+<div data-controller="foot-and-brace" class="flex flex-col space-y-4 py-6">
+  <div class="grid gap-2 grid-rows-2 grid-cols-2">
+    <canvas class="col-start-1 row-start-1 h-40 w-full" data-foot-and-brace-target="braceCanvas"></canvas>
+    <canvas class="col-start-1 row-start-2 h-40 w-full" data-foot-and-brace-target="footCanvas"></canvas>
+    <canvas class="col-start-2 row-start-1 h-40 w-full" data-foot-and-brace-target="braceWaveCanvas"></canvas>
+    <canvas class="col-start-2 row-start-2 h-40 w-full" data-foot-and-brace-target="footWaveCanvas"></canvas>
   </div>
-  <div style="display: flex; flex-direction: row;">
-    <div>
+  <div class="flex flex-row space-x-6">
+    <div class="flex flex-col flex-shrink min-w-0 space-y-1">
+      <label class="font-semibold" for="time">Time</label>
       <input
         data-foot-and-brace-target="time"
         data-action="foot-and-brace#changeTime"
@@ -898,10 +904,9 @@ use the slider to move through time.
         name="time"
         id="foot-and-brace-time"
       />
-      <label for="time">Time</label>
       <input type="text" data-foot-and-brace-target="timeDisplay" readonly="true" />
     </div>
-    <div>
+    <div class="flex-shrink min-w-0 space-y-1">
       <input
         data-foot-and-brace-target="activeSide"
         data-action="foot-and-brace#toggleActiveSide"
@@ -909,7 +914,7 @@ use the slider to move through time.
         name="active-side"
         id="foot-and-brace-filter"
       />
-      <label for="active-side">Period Filter</label>
+      <label class="font-semibold" for="active-side">Period Filter</label>
     </div>
   </div>
 </div>
@@ -972,61 +977,35 @@ and inside the simulation itself.
 Click and drag to rotate the camera. Hold shift and drag to move. Scroll to zoom.
 If you move the camera a bit, it's pretty easy to see how it all plays together.
 
-<style>
-  #scene {
-    width: 100%;
-    height: 100%;
-    display: block;
-    flex-shrink: 0;
-    margin-bottom: 20px;
-  }
-
-  #graphs {
-    width: 100%;
-    display: grid;
-    gap: 10px;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: repeat(2, 1fr);
-  }
-
-  #graphs canvas {
-    width: 50%;
-    height: 100%;
-  }
-
-  #sides {
-  }
-</style>
-
-<div id="sides">
-  <canvas id="scene"></canvas>
-  <div id="graphs">
-    <div style="grid-column: 1; grid-row: 1;">
+<div id="sides" class="flex flex-col space-y-4">
+  <canvas id="scene" class="w-full"></canvas>
+  <div class="grid grid-cols-2 grid-rows-2 gap-2">
+    <div class="col-start-1 row-start-1">
       <div><strong>Front Left</strong></div>
-      <div style="display: flex;">
-        <canvas id="graph-fl-brace"></canvas>
-        <canvas id="graph-fl-leg"></canvas>
+      <div class="flex">
+        <canvas class="h-full w-1/2" id="graph-fl-brace"></canvas>
+        <canvas class="h-full w-1/2" id="graph-fl-leg"></canvas>
       </div>
     </div>
-    <div style="grid-column: 1; grid-row: 2;">
+    <div class="col-start-1 row-start-2">
       <div><strong>Front Right</strong></div>
-      <div style="display: flex;">
-        <canvas id="graph-fr-brace"></canvas>
-        <canvas id="graph-fr-leg"></canvas>
+      <div class="flex">
+        <canvas class="h-full w-1/2" id="graph-fr-brace"></canvas>
+        <canvas class="h-full w-1/2" id="graph-fr-leg"></canvas>
       </div>
     </div>
-    <div style="grid-column: 2; grid-row: 1">
+    <div class="col-start-2 row-start-1">
       <div><strong>Back Left</strong></div>
-      <div style="display: flex;">
-        <canvas id="graph-bl-brace"></canvas>
-        <canvas id="graph-bl-leg"></canvas>
+      <div class="flex">
+        <canvas class="h-full w-1/2" id="graph-bl-brace"></canvas>
+        <canvas class="h-full w-1/2" id="graph-bl-leg"></canvas>
       </div>
     </div>
-    <div style="grid-column: 2; grid-row: 2">
+    <div class="col-start-2 row-start-2">
       <div><strong>Back Right</strong></div>
-      <div style="display: flex;">
-        <canvas id="graph-br-brace"></canvas>
-        <canvas id="graph-br-leg"></canvas>
+      <div class="flex">
+        <canvas class="h-full w-1/2" id="graph-br-brace"></canvas>
+        <canvas class="h-full w-1/2" id="graph-br-leg"></canvas>
       </div>
     </div>
   </div>

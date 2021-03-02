@@ -186,22 +186,40 @@ class OscillatorView2D {
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * window.devicePixelRatio;
     canvas.height = rect.height * window.devicePixelRatio;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
+      //canvas.style.width = `${rect.width}px`;
+      //canvas.style.height = `${rect.height}px`;
 
-    this.context = canvas.getContext('2d');
-    this.context.scale(window.devicePixelRatio, window.devicePixelRatio);
+    //this.context = canvas.getContext('2d');
+    //this.context.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+
+  resizeCanvas() {
+    const pixelRatio = window.devicePixelRatio;
+    const width = this.canvas.clientWidth * pixelRatio || 0;
+    const height = this.canvas.clientHeight * pixelRatio || 0;
+    const needResize = this.canvas.width !== width || this.canvas.height !== height;
+    if (needResize) {
+      this.canvas.width = this.canvas.clientWidth * pixelRatio;
+      this.canvas.height = this.canvas.clientHeight * pixelRatio;
+      //this.context.setTransform(1, 0, 0, 1, 0, 0);
+      //this.context.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    return needResize;
   }
 
   update(timeMs) {
+    this.resizeCanvas();
     const canvas = this.canvas;
     const width = canvas.width / window.devicePixelRatio;
     const height = canvas.height / window.devicePixelRatio;
-    const ctx = this.context;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     const maxY = this.maxY;
     const yPadding = 20;
     const xLabelWidth = 20;
     const yScale = ((height - yPadding) / 2.0) / maxY;
+
 
     const oscY = (t) => height / 2.0 + this.oscillator.valueAt(t) * yScale * -1;
 
@@ -286,8 +304,8 @@ class OscillatorView2D {
 function resizeRendererToDisplay(renderer) {
   const canvas = renderer.domElement;
   const pixelRatio = window.devicePixelRatio;
-  const width = canvas.clientWidth * pixelRatio || 0;
-  const height = canvas.clientHeight * pixelRatio || 0;
+  const width = canvas.clientWidth * pixelRatio | 0;
+  const height = canvas.clientHeight * pixelRatio | 0;
   const needResize = canvas.width !== width || canvas.height !== height;
   if (needResize) {
     renderer.setSize(width, height, false);
