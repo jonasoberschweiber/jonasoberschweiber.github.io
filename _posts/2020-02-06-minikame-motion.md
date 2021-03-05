@@ -203,20 +203,26 @@ title: miniKame Motion
       }
       drawBrace(timeMs) {
         const canvas = this.braceCanvasTarget;
+        const targetWidth = 354;
+        const targetHeight = 144;
+        const xRatio = canvas.clientWidth / targetWidth;
+        const yRatio = canvas.clientHeight / targetHeight;
+        const rX = x => x * xRatio;
+        const rY = y => y * yRatio;
         const ctx = canvas.getContext('2d');
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+        ctx.fillRect(0, 0, rX(targetWidth), rY(targetHeight));
         ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(1, 1, 118, 78);
+        ctx.fillRect(rX(1), rY(1), rX(118), rY(78));
         ctx.strokeStyle = 'rgb(120, 53, 15)';
-        ctx.strokeRect(0, 0, 120, 80);
+        ctx.strokeRect(0, 0, rX(120), rY(80));
         ctx.fillStyle = 'gray';
-        ctx.translate(120, 80);
+        ctx.translate(rX(120), rY(80));
         ctx.rotate(this.oscillator.valueAt(timeMs));
-        ctx.translate(-120, -80);
-        ctx.fillRect(95, 80 - 30, 60, 60);
-        ctx.fillRect(120, 95 - 30, 65, 30);
+        ctx.translate(rX(-120), rY(-80));
+        ctx.fillRect(rX(95), rY(80 - 30), rX(60), rY(60));
+        ctx.fillRect(rX(120), rY(95 - 30), rX(65), rY(30));
         ctx.setTransform(1, 0, 0, 1, 0, 0);
       }
       changeAmplitude() {
@@ -287,46 +293,52 @@ title: miniKame Motion
       }
       drawBraces(timeMs) {
         const canvas = this.braceCanvasTarget;
+        const targetWidth = 288;
+        const targetHeight = 144;
+        const xRatio = canvas.clientWidth / targetWidth;
+        const yRatio = canvas.clientHeight / targetHeight;
+        const rX = x => x * xRatio;
+        const rY = y => y * yRatio;
         const ctx = canvas.getContext('2d');
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, rX(targetWidth), rY(targetHeight));
         ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(40, 40, 108, 68);
+        ctx.fillRect(rX(40), rY(40), rX(108), rY(68));
         ctx.strokeStyle = 'rgb(120, 53, 15)';
-        ctx.strokeRect(39, 39, 110, 70);
+        ctx.strokeRect(rX(39), rY(39), rX(110), rY(70));
         ctx.fillStyle = 'rgb(16, 185, 129)';
         // br
-        ctx.translate(150, 110);
+        ctx.translate(rX(150), rY(110));
         ctx.rotate(this.oscillator_br.valueAt(timeMs));
-        ctx.translate(-150, -110);
-        ctx.fillRect(120 + 15, 110 - 15, 30, 30);
-        ctx.fillRect(120 + 15 + 10, 110 - 7.5, 35, 15);
+        ctx.translate(rX(-150), rY(-110));
+        ctx.fillRect(rX(120 + 15), rY(110 - 15), rX(30), rY(30));
+        ctx.fillRect(rX(120 + 15 + 10), rY(110 - 7.5), rX(35), rY(15));
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         // fl
-        ctx.translate(40, 40);
+        ctx.translate(rX(40), rY(40));
         ctx.rotate(-this.oscillator_fl.valueAt(timeMs));
-        ctx.translate(-40, -40);
-        ctx.fillRect(40 - 15, 40 - 15, 30, 30);
-        ctx.fillRect(40 - 15 - 15, 40 - 7.5, 35, 15);
+        ctx.translate(rX(-40), rY(-40));
+        ctx.fillRect(rX(40 - 15), rY(40 - 15), rX(30), rY(30));
+        ctx.fillRect(rX(40 - 15 - 15), rY(40 - 7.5), rX(35), rY(15));
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         // fr
         ctx.fillStyle = 'rgb(59, 130, 246)';
-        ctx.translate(150, 40);
+        ctx.translate(rX(150), rY(40));
         ctx.rotate(this.oscillator_fr.valueAt(timeMs));
-        ctx.translate(-150, -40);
-        ctx.fillRect(120 + 15, 40 - 15, 30, 30);
-        ctx.fillRect(120 + 15 + 10, 40 - 7.5, 35, 15);
+        ctx.translate(rX(-150), rY(-40));
+        ctx.fillRect(rX(120 + 15), rY(40 - 15), rX(30), rY(30));
+        ctx.fillRect(rX(120 + 15 + 10), rY(40 - 7.5), rX(35), rY(15));
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         // bl
-        ctx.translate(40, 110);
+        ctx.translate(rX(40), rY(110));
         ctx.rotate(-this.oscillator_bl.valueAt(timeMs));
-        ctx.translate(-40, -110);
-        ctx.fillRect(40 - 15, 110 - 15, 30, 30);
-        ctx.fillRect(40 - 15 - 15, 110 - 7.5, 35, 15);
+        ctx.translate(rX(-40), rY(-110));
+        ctx.fillRect(rX(40 - 15), rY(110 - 15), rX(30), rY(30));
+        ctx.fillRect(rX(40 - 15 - 15), rY(110 - 7.5), rX(35), rY(15));
         ctx.setTransform(1, 0, 0, 1, 0, 0);
       }
       changePhaseBLFR() {
@@ -405,41 +417,53 @@ title: miniKame Motion
       }
       drawBrace(timeMs) {
         const canvas = this.braceCanvasTarget;
+        const targetWidth = 350;
+        const targetHeight = 160;
+        const xRatio = canvas.clientWidth / targetWidth;
+        const yRatio = canvas.clientHeight / targetHeight;
+        const rX = x => x * xRatio;
+        const rY = y => y * yRatio;
         const ctx = canvas.getContext('2d');
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, rX(canvas.width), rY(canvas.height));
         ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(1, 1, 118, 78);
+        ctx.fillRect(rX(1), rY(1), rX(118), rY(78));
         ctx.strokeStyle = 'rgb(120, 53, 15)';
-        ctx.strokeRect(0, 0, 120, 80);
+        ctx.strokeRect(0, 0, rX(120), rY(80));
         ctx.fillStyle = 'gray';
-        ctx.translate(120, 80);
+        ctx.translate(rX(120), rY(80));
         ctx.rotate(this.braceOscillator.valueAt(timeMs));
-        ctx.translate(-120, -80);
-        ctx.fillRect(95, 80 - 30, 60, 60);
-        ctx.fillRect(120, 95 - 30, 65, 30);
+        ctx.translate(rX(-120), rY(-80));
+        ctx.fillRect(rX(95), rY(80 - 30), rX(60), rY(60));
+        ctx.fillRect(rX(120), rY(95 - 30), rX(65), rY(30));
         ctx.setTransform(1, 0, 0, 1, 0, 0);
       }
       drawFoot(timeMs) {
         const canvas = this.footCanvasTarget;
+        const targetWidth = 350;
+        const targetHeight = 160;
+        const xRatio = canvas.clientWidth / targetWidth;
+        const yRatio = canvas.clientHeight / targetHeight;
+        const rX = x => x * xRatio;
+        const rY = y => y * yRatio;
         const ctx = canvas.getContext('2d');
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, rX(targetWidth), rY(targetHeight));
         ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(1, 31, 118, 38);
+        ctx.fillRect(rX(1), rY(31), rX(118), rY(38));
         ctx.strokeStyle = 'rgb(120, 53, 15)';
-        ctx.strokeRect(0, 30, 120, 40);
+        ctx.strokeRect(0, rY(30), rX(120), rY(40));
         ctx.fillStyle = 'gray';
         // brace
-        ctx.fillRect(100, 20, 50, 10);
-        ctx.fillRect(130, 20, 30, 60);
-        ctx.fillRect(100, 70, 50, 10);
+        ctx.fillRect(rX(100), rY(20), rX(50), rY(10));
+        ctx.fillRect(rX(130), rY(20), rX(30), rY(60));
+        ctx.fillRect(rX(100), rY(70), rX(50), rY(10));
         // foot
         ctx.fillStyle = 'red';
-        ctx.fillRect(180, 30 - this.footOscillator.valueAt(timeMs), 30, 80);
+        ctx.fillRect(rX(180), rY(30 - this.footOscillator.valueAt(timeMs)), rX(30), rY(80));
       }
     });
   })();
