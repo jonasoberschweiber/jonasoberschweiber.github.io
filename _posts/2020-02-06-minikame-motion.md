@@ -578,7 +578,7 @@ y(t) = sin(period * t)
      class="flex flex-col space-y-4 py-6"
   >
   <canvas class="w-full h-36" data-sine-target="canvas"></canvas>
-  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6 md:space-y-0">
     <div class="flex flex-col flex-shrink min-w-0 space-y-1">
       <label class="font-semibold" for="period">Period</label>
       <input
@@ -610,7 +610,7 @@ y(t) = amplitude * sin(period * t)
      class="flex flex-col space-y-4 py-6"
   >
   <canvas class="w-full h-36" data-sine-target="canvas"></canvas>
-  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6 md:space-y-0">
     <div class="flex flex-col flex-shrink min-w-0 space-y-1">
       <label class="font-semibold" for="period">Period</label>
       <input
@@ -655,7 +655,7 @@ y(t) = amplitude * sin(period * (t + phase))
      class="flex flex-col space-y-4 py-6"
   >
   <canvas class="w-full h-36" data-sine-target="canvas"></canvas>
-  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6 md:space-y-0">
     <div class="flex flex-col flex-shrink min-w-0 space-y-1">
       <label class="font-semibold" for="period">Period</label>
       <input
@@ -711,7 +711,7 @@ y(t) = amplitude * sin(period * (t + phase)) + offset
      class="flex flex-col space-y-4 py-6"
   >
   <canvas class="w-full h-36" data-sine-target="canvas"></canvas>
-  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6 md:space-y-0">
     <div class="flex flex-col flex-shrink min-w-0 space-y-1">
       <label class="font-semibold" for="period">Period</label>
       <input
@@ -784,7 +784,7 @@ speed of motion is just right.
     <canvas class="w-1/2 h-36" data-single-brace-target="braceCanvas"></canvas>
     <canvas class="w-1/2 h-36" data-single-brace-target="waveCanvas"></canvas>
   </div>
-  <div class="flex flex-col md:flex-row md:space-x-6 space-y-4">
+  <div class="flex flex-col md:flex-row md:space-x-6 space-y-4 md:space-y-0">
     <div class="flex flex-col flex-shrink min-w-0 space-y-1">
       <label class="font-semibold" for="period">Period</label>
       <input
@@ -851,7 +851,7 @@ front right and back left <fr-bl></fr-bl> brace sine waves and a phase shift of
   <div class="flex flex-row">
     <canvas class="h-36" data-four-braces-target="braceCanvas"></canvas>
   </div>
-  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6">
+  <div class="flex flex-col space-y-4 md:flex-row md:space-x-6 md:space-y-0">
     <div class="flex flex-col flex-shrink min-w-0 space-y-1">
       <label class="font-semibold" for="phaseBRFL">Phase FL/BR <fl-br></fl-br></label>
       <input
