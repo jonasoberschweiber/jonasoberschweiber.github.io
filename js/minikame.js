@@ -188,9 +188,6 @@ class OscillatorView2D {
     canvas.height = rect.height * window.devicePixelRatio;
 
     window.addEventListener('resize', () => this.resizeCanvas());
-
-    //this.context = canvas.getContext('2d');
-    //this.context.scale(window.devicePixelRatio, window.devicePixelRatio);
   }
 
   resizeCanvas() {
@@ -201,8 +198,6 @@ class OscillatorView2D {
     if (needResize) {
       this.canvas.width = this.canvas.clientWidth * pixelRatio;
       this.canvas.height = this.canvas.clientHeight * pixelRatio;
-      //this.context.setTransform(1, 0, 0, 1, 0, 0);
-      //this.context.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
     return needResize;
   }
@@ -312,7 +307,7 @@ function resizeRendererToDisplay(renderer) {
   return needResize;
 }
 
-function setup() {
+function setup3DView() {
   // Setup scene.
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xaaaaaa);
@@ -474,7 +469,7 @@ function setup() {
   };
 }
 
-function animate(timeMs, scene) {
+function animate3DView(timeMs, scene) {
   const {
     renderer,
     legs,
@@ -524,12 +519,454 @@ function animate(timeMs, scene) {
   scene.controls.update();
   renderer.render(scene.scene, scene.camera);
 
-  requestAnimationFrame((t) => animate(t, scene));
+  requestAnimationFrame((t) => animate3DView(t, scene));
+}
+
+function scaleCanvas(canvas) {
+  const pixelRatio = window.devicePixelRatio;
+  const width = canvas.clientWidth * pixelRatio || 0;
+  const height = canvas.clientHeight * pixelRatio || 0;
+  const needResize = canvas.width !== width || canvas.height !== height;
+  if (needResize) {
+    canvas.width = canvas.clientWidth * pixelRatio;
+    canvas.height = canvas.clientHeight * pixelRatio;
+  }
+}
+
+class SineController extends Stimulus.Controller {
+  static get targets() {
+    return ["canvas", "amplitude", "phase", "offset", "period", "periodDisplay", "amplitudeDisplay", "phaseDisplay", "offsetDisplay"];
+  }
+  static get values() {
+    return {
+      amplitude: Number,
+      phase: Number,
+      offset: Number,
+      period: Number,
+      ticks: Number,
+      displayTicks: Boolean,
+      xLabels: String
+    };
+  }
+  initialize() {
+    this.oscillator = new Oscillator(1.0, 0.0, 0.0, 1000, 0);
+  }
+  connect() {
+    if (this.hasAmplitudeValue) {
+      this.oscillator.amplitude = this.amplitudeValue;
+    }
+    if (this.hasPeriodValue) {
+      this.oscillator.period = this.periodValue;
+    }
+    let ticks = 2000.0;
+    if (this.hasTicksValue) {
+      ticks = this.ticksValue;
+    }
+    let xLabels = null;
+    if (this.hasXLabelsValue) {
+      xLabels = this.xLabelsValue.split(' ');
+    }
+    let displayTicks = true;
+    if (this.hasDisplayTicksValue) {
+      displayTicks = this.displayTicksValue;
+    }
+    this.view = new OscillatorView2D(
+      this.oscillator,
+      this.canvasTarget,
+      null,
+      {
+        ticks: ticks,
+        maxY: 2,
+        displayTicks: displayTicks,
+        spacedXLabels: xLabels
+      }
+    );
+    this.draw();
+    if (this.hasAmplitudeTarget) {
+      this.amplitudeTarget.value = this.oscillator.amplitude;
+    }
+    if (this.hasPhaseTarget) {
+      this.phaseTarget.value = this.oscillator.phase;
+    }
+    if (this.hasOffsetTarget) {
+      this.offsetTarget.value = this.oscillator.offset;
+    }
+    if (this.hasPeriodTarget) {
+      this.periodTarget.value = this.oscillator.period;
+    }
+    window.addEventListener('resize', () => this.draw());
+  }
+  disconnect() {
+    this.view = null;
+  }
+  draw() {
+    if (this.hasPeriodDisplayTarget) {
+      this.periodDisplayTarget.value = this.oscillator.period;
+    }
+    if (this.hasAmplitudeDisplayTarget) {
+      this.amplitudeDisplayTarget.value = this.oscillator.amplitude;
+    }
+    if (this.hasPhaseDisplayTarget) {
+      this.phaseDisplayTarget.value = this.renderPhase();
+    }
+    if (this.hasOffsetDisplayTarget) {
+      this.offsetDisplayTarget.value = this.oscillator.offset;
+    }
+    this.view.update(0);
+  }
+  renderPhase() {
+    const degrees = Math.trunc(this.oscillator.phase * 180.0 / Math.PI);
+    const overPi = this.oscillator.phase / Math.PI;
+    const digits = overPi - Math.floor(overPi);
+    let closestPiFraction = '';
+    if (digits >= 0 && digits <= 0.05) {
+      closestPiFraction = ' / ~' + Math.floor(overPi) + 'π';
+    }
+    if (digits >= 0.48 && digits <= 0.52) {
+      closestPiFraction = ' / ~' + (Math.floor(overPi) + 0.5) + 'π';
+    }
+    return `${this.oscillator.phase.toString()} rad / ${degrees} deg` + closestPiFraction;
+  }
+  changeAmplitude() {
+    this.oscillator.amplitude = parseFloat(this.amplitudeTarget.value);
+    this.draw();
+  }
+  changePhase() {
+    this.oscillator.phase = parseFloat(this.phaseTarget.value);
+    this.draw();
+  }
+  changeOffset() {
+    this.oscillator.offset = parseFloat(this.offsetTarget.value);
+    this.draw();
+  }
+  changePeriod() {
+    this.oscillator.period = parseFloat(this.periodTarget.value);
+    this.draw();
+  }
+}
+
+class SingleBraceController extends Stimulus.Controller {
+  static get targets() {
+    return ["braceCanvas", "waveCanvas", "amplitude", "offset", "period", "phase", "amplitudeDisplay", "offsetDisplay", "periodDisplay", "phaseDisplay"];
+  }
+  initialize() {
+    this.oscillator = new Oscillator(1.0, 0.0, 0.4, 1000.0, 0.0);
+  }
+  connect() {
+    this.view = new OscillatorView2D(
+      this.oscillator,
+      this.waveCanvasTarget,
+      null,
+      {
+        ticks: 2000.0,
+        maxY: 2,
+        displayTicks: true,
+      }
+    );
+    scaleCanvas(this.braceCanvasTarget);
+    const animate = (timeMs) => {
+      this.view.update(timeMs);
+      this.drawBrace(timeMs);
+      requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+    this.updateDisplays();
+    window.addEventListener('resize', () => scaleCanvas(this.braceCanvasTarget));
+  }
+  updateDisplays() {
+    if (this.hasPeriodDisplayTarget) {
+      this.periodDisplayTarget.value = this.oscillator.period;
+    }
+    if (this.hasAmplitudeDisplayTarget) {
+      this.amplitudeDisplayTarget.value = this.oscillator.amplitude;
+    }
+    if (this.hasPhaseDisplayTarget) {
+      this.phaseDisplayTarget.value = this.oscillator.phase;
+    }
+    if (this.hasOffsetDisplayTarget) {
+      this.offsetDisplayTarget.value = this.oscillator.offset;
+    }
+  }
+  drawBrace(timeMs) {
+    const canvas = this.braceCanvasTarget;
+    const targetWidth = 354;
+    const targetHeight = 144;
+    const xRatio = canvas.clientWidth / targetWidth;
+    const yRatio = canvas.clientHeight / targetHeight;
+    const rX = x => x * xRatio;
+    const rY = y => y * yRatio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, rX(targetWidth), rY(targetHeight));
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(rX(1), rY(1), rX(118), rY(78));
+    ctx.strokeStyle = 'rgb(120, 53, 15)';
+    ctx.strokeRect(0, 0, rX(120), rY(80));
+    ctx.fillStyle = 'gray';
+    ctx.translate(rX(120), rY(80));
+    ctx.rotate(this.oscillator.valueAt(timeMs));
+    ctx.translate(rX(-120), rY(-80));
+    ctx.fillRect(rX(95), rY(80 - 30), rX(60), rY(60));
+    ctx.fillRect(rX(120), rY(95 - 30), rX(65), rY(30));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  changeAmplitude() {
+    this.oscillator.amplitude = parseFloat(this.amplitudeTarget.value);
+    this.updateDisplays();
+  }
+  changePhase() {
+    this.oscillator.phase = parseFloat(this.phaseTarget.value);
+    this.updateDisplays();
+  }
+  changeOffset() {
+    this.oscillator.offset = parseFloat(this.offsetTarget.value);
+    this.updateDisplays();
+  }
+  changePeriod() {
+    this.oscillator.period = parseFloat(this.periodTarget.value);
+    this.updateDisplays();
+  }
+}
+
+class FourBracesController extends Stimulus.Controller {
+  static get targets() {
+    return ["braceCanvas", "waveCanvas", "phaseBLFR", "phaseBLFRDisplay", "phaseBRFL", "phaseBRFLDisplay"];
+  }
+  initialize() {
+    this.oscillator_br = new Oscillator(0.8, Math.PI / 2.0, 0.4, 1000.0, 0.0);
+    this.oscillator_fl = new Oscillator(0.8, Math.PI / 2.0, -0.1, 1000.0, 0.0);
+    this.oscillator_bl = new Oscillator(0.8, Math.PI * 1.5, 0.4, 1000.0, 0.0);
+    this.oscillator_fr = new Oscillator(0.8, Math.PI * 1.5, -0.1, 1000.0, 0.0);
+  }
+  connect() {
+    if (this.hasPhaseBRFLTarget) {
+      this.phaseBRFLTarget.value = this.oscillator_br.phase;
+    }
+    if (this.hasPhaseBLFRTarget) {
+      this.phaseBLFRTarget.value = this.oscillator_bl.phase;
+    }
+    scaleCanvas(this.braceCanvasTarget);
+    this.drawBraces(0);
+    const animate = (timeMs) => {
+      //this.view.update(timeMs);
+      this.drawBraces(timeMs);
+      requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+    this.updateDisplays();
+    window.addEventListener('resize', () => scaleCanvas(this.braceCanvasTarget));
+  }
+  updateDisplays() {
+    if (this.hasPhaseBLFRDisplayTarget) {
+      this.phaseBLFRDisplayTarget.value = this.renderPhase(this.oscillator_bl.phase);
+    }
+    if (this.hasPhaseBRFLDisplayTarget) {
+      this.phaseBRFLDisplayTarget.value = this.renderPhase(this.oscillator_br.phase);
+    }
+  }
+  renderPhase(phase) {
+    const degrees = Math.trunc(phase * 180.0 / Math.PI);
+    const overPi = phase / Math.PI;
+    const digits = overPi - Math.floor(overPi);
+    let closestPiFraction = '';
+    if (digits >= 0 && digits <= 0.05) {
+      closestPiFraction = ' / ~' + Math.floor(overPi) + 'π';
+    }
+    if (digits >= 0.48 && digits <= 0.52) {
+      closestPiFraction = ' / ~' + (Math.floor(overPi) + 0.5) + 'π';
+    }
+    return `${phase.toFixed(3).toString()} rad / ${degrees} deg` + closestPiFraction;
+  }
+  drawBraces(timeMs) {
+    const canvas = this.braceCanvasTarget;
+    const targetWidth = 288;
+    const targetHeight = 144;
+    const xRatio = canvas.clientWidth / targetWidth;
+    const yRatio = canvas.clientHeight / targetHeight;
+    const rX = x => x * xRatio;
+    const rY = y => y * yRatio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, rX(targetWidth), rY(targetHeight));
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(rX(40), rY(40), rX(108), rY(68));
+    ctx.strokeStyle = 'rgb(120, 53, 15)';
+    ctx.strokeRect(rX(39), rY(39), rX(110), rY(70));
+    ctx.fillStyle = 'rgb(16, 185, 129)';
+    // br
+    ctx.translate(rX(150), rY(110));
+    ctx.rotate(this.oscillator_br.valueAt(timeMs));
+    ctx.translate(rX(-150), rY(-110));
+    ctx.fillRect(rX(120 + 15), rY(110 - 15), rX(30), rY(30));
+    ctx.fillRect(rX(120 + 15 + 10), rY(110 - 7.5), rX(35), rY(15));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    // fl
+    ctx.translate(rX(40), rY(40));
+    ctx.rotate(-this.oscillator_fl.valueAt(timeMs));
+    ctx.translate(rX(-40), rY(-40));
+    ctx.fillRect(rX(40 - 15), rY(40 - 15), rX(30), rY(30));
+    ctx.fillRect(rX(40 - 15 - 15), rY(40 - 7.5), rX(35), rY(15));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    // fr
+    ctx.fillStyle = 'rgb(59, 130, 246)';
+    ctx.translate(rX(150), rY(40));
+    ctx.rotate(this.oscillator_fr.valueAt(timeMs));
+    ctx.translate(rX(-150), rY(-40));
+    ctx.fillRect(rX(120 + 15), rY(40 - 15), rX(30), rY(30));
+    ctx.fillRect(rX(120 + 15 + 10), rY(40 - 7.5), rX(35), rY(15));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    // bl
+    ctx.translate(rX(40), rY(110));
+    ctx.rotate(-this.oscillator_bl.valueAt(timeMs));
+    ctx.translate(rX(-40), rY(-110));
+    ctx.fillRect(rX(40 - 15), rY(110 - 15), rX(30), rY(30));
+    ctx.fillRect(rX(40 - 15 - 15), rY(110 - 7.5), rX(35), rY(15));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  changePhaseBLFR() {
+    this.oscillator_bl.phase = parseFloat(this.phaseBLFRTarget.value);
+    this.oscillator_fr.phase = parseFloat(this.phaseBLFRTarget.value);
+    this.updateDisplays();
+  }
+  changePhaseBRFL() {
+    this.oscillator_br.phase = parseFloat(this.phaseBRFLTarget.value);
+    this.oscillator_fl.phase = parseFloat(this.phaseBRFLTarget.value);
+    this.updateDisplays();
+  }
+}
+
+class FootAndBraceController extends Stimulus.Controller {
+  static get targets() {
+    return ["braceCanvas", "footCanvas", "braceWaveCanvas", "footWaveCanvas", "time", "timeDisplay", "activeSide"];
+  }
+  initialize() {
+    this.braceOscillator = new Oscillator(1.0, Math.PI / 2.0, 0.4, 1000.0, 0.0);
+    this.footOscillator = new Oscillator(10, Math.PI / 2.0, 10, 500.0, 0.0);
+    this.activeSide = null;
+  }
+  connect() {
+    this.braceView = new OscillatorView2D(
+      this.braceOscillator,
+      this.braceWaveCanvasTarget,
+      null,
+      {
+        ticks: 3000.0,
+        maxY: 2,
+        displayTicks: true,
+      }
+    );
+    this.footView = new OscillatorView2D(
+      this.footOscillator,
+      this.footWaveCanvasTarget,
+      this.activeSide,
+      {
+        ticks: 3000.0,
+        period: 1000.0,
+        maxY: 20,
+        displayTicks: true,
+      }
+    );
+    scaleCanvas(this.braceCanvasTarget);
+    scaleCanvas(this.footCanvasTarget);
+    this.timeTarget.value = 0;
+    this.activeSideTarget.checked = this.activeSide === 0;
+    window.addEventListener('resize', () => {
+      scaleCanvas(this.braceCanvasTarget);
+      scaleCanvas(this.footCanvasTarget);
+      this.draw(parseInt(this.timeTarget.value));
+    });
+    this.draw(0)
+  }
+  changeTime() {
+    this.draw(parseInt(this.timeTarget.value));
+  }
+  toggleActiveSide() {
+    this.activeSide = this.activeSideTarget.checked ? 0 : null;
+    this.footView.activeSide = this.activeSide;
+    this.draw(parseInt(this.timeTarget.value));
+  }
+  draw(timeMs) {
+    this.drawBrace(timeMs);
+    this.braceView.update(timeMs);
+    this.footView.update(timeMs);
+    const side = Math.floor(timeMs / (1000.0 / 2.0)) % 2;
+    if (this.activeSide === null || this.activeSide === side) {
+      this.drawFoot(timeMs);
+    }
+    if (this.hasTimeDisplayTarget) {
+      this.timeDisplayTarget.value = timeMs;
+    }
+    this.activeSideTarget.checked = this.activeSide === 0;
+  }
+  drawBrace(timeMs) {
+    const canvas = this.braceCanvasTarget;
+    const targetWidth = 350;
+    const targetHeight = 160;
+    const xRatio = canvas.clientWidth / targetWidth;
+    const yRatio = canvas.clientHeight / targetHeight;
+    const rX = x => x * xRatio;
+    const rY = y => y * yRatio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, rX(canvas.width), rY(canvas.height));
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(rX(1), rY(1), rX(118), rY(78));
+    ctx.strokeStyle = 'rgb(120, 53, 15)';
+    ctx.strokeRect(0, 0, rX(120), rY(80));
+    ctx.fillStyle = 'gray';
+    ctx.translate(rX(120), rY(80));
+    ctx.rotate(this.braceOscillator.valueAt(timeMs));
+    ctx.translate(rX(-120), rY(-80));
+    ctx.fillRect(rX(95), rY(80 - 30), rX(60), rY(60));
+    ctx.fillRect(rX(120), rY(95 - 30), rX(65), rY(30));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  drawFoot(timeMs) {
+    const canvas = this.footCanvasTarget;
+    const targetWidth = 350;
+    const targetHeight = 160;
+    const xRatio = canvas.clientWidth / targetWidth;
+    const yRatio = canvas.clientHeight / targetHeight;
+    const rX = x => x * xRatio;
+    const rY = y => y * yRatio;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, rX(targetWidth), rY(targetHeight));
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(rX(1), rY(31), rX(118), rY(38));
+    ctx.strokeStyle = 'rgb(120, 53, 15)';
+    ctx.strokeRect(0, rY(30), rX(120), rY(40));
+    ctx.fillStyle = 'gray';
+    // brace
+    ctx.fillRect(rX(100), rY(20), rX(50), rY(10));
+    ctx.fillRect(rX(130), rY(20), rX(30), rY(60));
+    ctx.fillRect(rX(100), rY(70), rX(50), rY(10));
+    // foot
+    ctx.fillStyle = 'red';
+    ctx.fillRect(rX(180), rY(30 - this.footOscillator.valueAt(timeMs)), rX(30), rY(80));
+  }
+}
+
+function setupStimulusControllers() {
+  const application = Stimulus.Application.start();
+  application.register("sine", SineController);
+  application.register("single-brace", SingleBraceController);
+  application.register("four-braces", FourBracesController);
+  application.register("foot-and-brace", FootAndBraceController);
 }
 
 export {
-  setup,
-  animate,
+  setup3DView,
+  animate3DView,
+  setupStimulusControllers,
   Oscillator,
   OscillatorView2D
 };
