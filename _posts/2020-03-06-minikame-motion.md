@@ -39,7 +39,7 @@ title: miniKame Motion
 
 # Minikame Motion
 
-A few months ago, I built my own version of [miniKame](1), a 3D printed quadruped
+A few months ago, I built my own version of [miniKame][1], a 3D printed quadruped
 robot powered by an ESP8266. I built it mostly as per the instructions in the
 GitHub wiki, but redesigned all the parts in Fusion 360 based off of the original
 FreeCAD files as an exercise to gain experience using Fusion 360. I also didn't
@@ -574,7 +574,7 @@ front right/back left <fr-bl></fr-bl> brace front-to-back motion.
 
 Put all of the above together, and you get a miniKame robot that can move
 forward. To show how it all works together, I built a small simulation using
-[Three.js](1)[^1]. You can see the individual sine waves below the simulation
+[Three.js][2][^1]. You can see the individual sine waves below the simulation
 and inside the simulation itself.
 Click and drag to rotate the camera. Hold shift and drag to move. Scroll to zoom.
 If you move the camera a bit, it's pretty easy to see how it all plays together.
