@@ -522,20 +522,53 @@ function animate3DView(timeMs, scene) {
   requestAnimationFrame((t) => animate3DView(t, scene));
 }
 
+// A helper to keep the virtual size of the canvas -- the one that you use to
+// draw on it -- in sync with its actual size on the page, taking into account
+// the current device's pixel ratio. Call this once on initialization and then
+// whenever the window's resize event fires.
 function scaleCanvas(canvas) {
   const pixelRatio = window.devicePixelRatio;
   const width = canvas.clientWidth * pixelRatio || 0;
   const height = canvas.clientHeight * pixelRatio || 0;
-  const needResize = canvas.width !== width || canvas.height !== height;
+  const needResize = Math.abs(canvas.width - width) > 1 || Math.abs(canvas.height - height) > 1;
   if (needResize) {
     canvas.width = canvas.clientWidth * pixelRatio;
     canvas.height = canvas.clientHeight * pixelRatio;
   }
 }
 
+// Generates scaling functions that let you draw on a canvas in some virtual
+// size that you set up front. Does not currently take aspect ratios into
+// account.
+// Returns a four-element list with target width, target height, an x scaling
+// function and a y scaling function.
+function canvasResizer(canvas, targetWidth, targetHeight) {
+  const xRatio = canvas.clientWidth / targetWidth;
+  const yRatio = canvas.clientHeight / targetHeight;
+  const rX = x => x * xRatio;
+  const rY = y => y * yRatio;
+  return [
+    targetWidth,
+    targetHeight,
+    rX,
+    rY
+  ];
+}
+
+// Controller for a simple, tweakable sine wave.
 class SineController extends Stimulus.Controller {
   static get targets() {
-    return ["canvas", "amplitude", "phase", "offset", "period", "periodDisplay", "amplitudeDisplay", "phaseDisplay", "offsetDisplay"];
+    return [
+      "canvas",
+      "amplitude",
+      "phase",
+      "offset",
+      "period",
+      "periodDisplay",
+      "amplitudeDisplay",
+      "phaseDisplay",
+      "offsetDisplay"
+    ];
   }
   static get values() {
     return {
@@ -645,9 +678,21 @@ class SineController extends Stimulus.Controller {
   }
 }
 
+// Controller for a single, animated brace and a corresponding sine wave.
 class SingleBraceController extends Stimulus.Controller {
   static get targets() {
-    return ["braceCanvas", "waveCanvas", "amplitude", "offset", "period", "phase", "amplitudeDisplay", "offsetDisplay", "periodDisplay", "phaseDisplay"];
+    return [
+      "braceCanvas",
+      "waveCanvas",
+      "amplitude",
+      "offset",
+      "period",
+      "phase",
+      "amplitudeDisplay",
+      "offsetDisplay",
+      "periodDisplay",
+      "phaseDisplay"
+    ];
   }
   initialize() {
     this.oscillator = new Oscillator(1.0, 0.0, 0.4, 1000.0, 0.0);
@@ -689,12 +734,7 @@ class SingleBraceController extends Stimulus.Controller {
   }
   drawBrace(timeMs) {
     const canvas = this.braceCanvasTarget;
-    const targetWidth = 354;
-    const targetHeight = 144;
-    const xRatio = canvas.clientWidth / targetWidth;
-    const yRatio = canvas.clientHeight / targetHeight;
-    const rX = x => x * xRatio;
-    const rY = y => y * yRatio;
+    const [targetWidth, targetHeight, rX, rY] = canvasResizer(canvas, 354, 144);
     const ctx = canvas.getContext('2d');
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     ctx.fillStyle = '#fff';
@@ -729,9 +769,19 @@ class SingleBraceController extends Stimulus.Controller {
   }
 }
 
+// Controller for four animated braces with a tweakable phase shift on front
+// left/back right and front right/back left.
 class FourBracesController extends Stimulus.Controller {
   static get targets() {
-    return ["braceCanvas", "waveCanvas", "phaseBLFR", "phaseBLFRDisplay", "phaseBRFL", "phaseBRFLDisplay"];
+    return [
+      "braceCanvas",
+      "phaseBLFR",
+      "phaseBLFRDisplay",
+      "phaseBRFL",
+      "phaseBRFLDisplay",
+      "waveBLFRCanvas",
+      "waveBRFLCanvas"
+    ];
   }
   initialize() {
     this.oscillator_br = new Oscillator(0.8, Math.PI / 2.0, 0.4, 1000.0, 0.0);
@@ -746,10 +796,33 @@ class FourBracesController extends Stimulus.Controller {
     if (this.hasPhaseBLFRTarget) {
       this.phaseBLFRTarget.value = this.oscillator_bl.phase;
     }
+
+    this.brflView = new OscillatorView2D(
+      this.oscillator_br,
+      this.waveBRFLCanvasTarget,
+      null,
+      {
+        ticks: 2000.0,
+        maxY: 2,
+        displayTicks: true,
+      }
+    );
+    this.blfrView = new OscillatorView2D(
+      this.oscillator_bl,
+      this.waveBLFRCanvasTarget,
+      null,
+      {
+        ticks: 2000.0,
+        maxY: 2,
+        displayTicks: true,
+      }
+    );
+
     scaleCanvas(this.braceCanvasTarget);
     this.drawBraces(0);
     const animate = (timeMs) => {
-      //this.view.update(timeMs);
+      this.brflView.update(timeMs);
+      this.blfrView.update(timeMs);
       this.drawBraces(timeMs);
       requestAnimationFrame(animate);
     };
@@ -780,12 +853,7 @@ class FourBracesController extends Stimulus.Controller {
   }
   drawBraces(timeMs) {
     const canvas = this.braceCanvasTarget;
-    const targetWidth = 288;
-    const targetHeight = 144;
-    const xRatio = canvas.clientWidth / targetWidth;
-    const yRatio = canvas.clientHeight / targetHeight;
-    const rX = x => x * xRatio;
-    const rY = y => y * yRatio;
+    const [targetWidth, targetHeight, rX, rY] = canvasResizer(canvas, 288, 144);
     const ctx = canvas.getContext('2d');
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     ctx.fillStyle = '#fff';
@@ -840,9 +908,18 @@ class FourBracesController extends Stimulus.Controller {
   }
 }
 
+// Controller for a foot and brace view with wave display and tweakable time.
 class FootAndBraceController extends Stimulus.Controller {
   static get targets() {
-    return ["braceCanvas", "footCanvas", "braceWaveCanvas", "footWaveCanvas", "time", "timeDisplay", "activeSide"];
+    return [
+      "braceCanvas",
+      "footCanvas",
+      "braceWaveCanvas",
+      "footWaveCanvas",
+      "time",
+      "timeDisplay",
+      "activeSide"
+    ];
   }
   initialize() {
     this.braceOscillator = new Oscillator(1.0, Math.PI / 2.0, 0.4, 1000.0, 0.0);
@@ -905,12 +982,7 @@ class FootAndBraceController extends Stimulus.Controller {
   }
   drawBrace(timeMs) {
     const canvas = this.braceCanvasTarget;
-    const targetWidth = 350;
-    const targetHeight = 160;
-    const xRatio = canvas.clientWidth / targetWidth;
-    const yRatio = canvas.clientHeight / targetHeight;
-    const rX = x => x * xRatio;
-    const rY = y => y * yRatio;
+    const [targetWidth, targetHeight, rX, rY] = canvasResizer(canvas, 350, 160);
     const ctx = canvas.getContext('2d');
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     ctx.fillStyle = '#fff';
@@ -929,12 +1001,7 @@ class FootAndBraceController extends Stimulus.Controller {
   }
   drawFoot(timeMs) {
     const canvas = this.footCanvasTarget;
-    const targetWidth = 350;
-    const targetHeight = 160;
-    const xRatio = canvas.clientWidth / targetWidth;
-    const yRatio = canvas.clientHeight / targetHeight;
-    const rX = x => x * xRatio;
-    const rY = y => y * yRatio;
+    const [targetWidth, targetHeight, rX, rY] = canvasResizer(canvas, 350, 160);
     const ctx = canvas.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);

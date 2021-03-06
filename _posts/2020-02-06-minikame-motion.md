@@ -417,7 +417,11 @@ front right and back left <fr-bl></fr-bl> brace sine waves and a phase shift of
 
 <div data-controller="four-braces" class="flex flex-col space-y-4 py-6">
   <div class="flex flex-row">
-    <canvas class="h-36" data-four-braces-target="braceCanvas"></canvas>
+    <canvas class="h-36 w-1/2" data-four-braces-target="braceCanvas"></canvas>
+    <div class="flex flex-col w-1/2">
+      <canvas class="h-18 w-full" data-four-braces-target="waveBRFLCanvas"></canvas>
+      <canvas class="h-18 w-full" data-four-braces-target="waveBLFRCanvas"></canvas>
+    </div>
   </div>
   <div class="flex flex-col space-y-4 md:flex-row md:space-x-6 md:space-y-0">
     <div class="flex flex-col flex-shrink min-w-0 space-y-1">
