@@ -623,8 +623,8 @@ requestAnimationFrame(t => animate3DView(t, scene));
 setupStimulusControllers();
 </script>
 
-[1]: miniKame
-[2]: threejs
+[1]: https://github.com/JavierIH/miniKame
+[2]: https://threejs.org
 
 [^1]: If you want to learn Three.js, check out https://threejsfundamentals.org. I had absolutely zero prior knowledge of Three.js and the last time I did any graphics was years ago. Using their guide, I was able to build this simple simulation in a couple of hours.
 [^2]: Z-direction is not strictly true since it also moves in the XY-direction, but I *think* that's irrelevant for understanding how the basic motion works.
