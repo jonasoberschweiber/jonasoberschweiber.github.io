@@ -5,8 +5,8 @@ layout: default
 Diese Webseite wird betrieben von
 
 Jonas Oberschweiber  
-Esmarchstr. 66
-24105 Kiel
+Mundsburger Damm 26b  
+22087 Hamburg  
 Email: jonas@oberschweiber.com
 
 Inhaltlich Verantwortlicher im Sinne § 55 Abs. 2 RStV: Jonas Oberschweiber
